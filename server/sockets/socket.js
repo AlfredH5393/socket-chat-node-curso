@@ -20,7 +20,7 @@ io.on('connection', (client) => {
         client.join(data.sala);
 
         let personas = usuarios.addPersona(client.id, data.nombre,data.sala);
-
+        client.to(data.sala).emit('crearMensaje', crearMensaje("Administrador", `${data.nombre} se unió ...`));
         client.to(data.sala).emit('listaPersonasConectadas', usuarios.getPersonasSalas(data.sala));
         callback({
             error: false,
@@ -35,6 +35,7 @@ io.on('connection', (client) => {
 
         let mensaje = crearMensaje(persona.nombre, data.mensaje)
         client.to(persona.sala).emit('crearMensaje', mensaje)
+        callback(mensaje)
     })
 
     client.on('disconnect', () => {

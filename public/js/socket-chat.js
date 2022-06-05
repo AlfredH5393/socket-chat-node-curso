@@ -1,20 +1,27 @@
 var socket = io();
 
-var params = new URLSearchParams( window.location.search )
-if(!params.has('nombre') || !params.has('sala')){
-    window.location = "index.html";
-    throw new Error('El nombre y sala son necesarios')
+var params = new URLSearchParams(window.location.search);
+
+if (!params.has('nombre') || !params.has('sala')) {
+    window.location = 'index.html';
+    throw new Error('El nombre y sala son necesarios');
 }
 
-let usuario = {
+var usuario = {
     nombre: params.get('nombre'),
-    sala: params.get("sala")
-}
+    sala: params.get('sala')
+};
+
+
 
 socket.on('connect', function() {
-    socket.emit('entrarChat', usuario, (resp) => {
-        console.log(resp)
-    })
+    console.log('Conectado al servidor');
+
+    socket.emit('entrarChat', usuario, function(resp) {
+        //console.log('Usuarios conectados', resp);
+        buidlUserList(resp)
+    });
+
 });
 
 // escuchar
@@ -24,27 +31,32 @@ socket.on('disconnect', function() {
 
 });
 
+
 // Enviar información
-// socket.emit('enviarMensaje', {
-//     usuario: 'Fernando',
+// socket.emit('crearMensaje', {
+//     nombre: 'Fernando',
 //     mensaje: 'Hola Mundo'
 // }, function(resp) {
 //     console.log('respuesta server: ', resp);
 // });
 
 // Escuchar información
-socket.on('crearMensaje', function(data) {
-
-    console.log('Servidor:', data);
-
+socket.on('crearMensaje', function(mensaje) {
+    console.log('Servidor:', mensaje);
+    buildMensajes(mensaje,false)
+    scrollBottom();
 });
 
-//Escuhcar cambios de usuarios
-socket.on('listaPersonasConectadas', function(data) {
-    console.log('Personas conectadas actualmente', data);
-})
+// Escuchar cambios de usuarios
+// cuando un usuario entra o sale del chat
+socket.on('listaPersonasConectadas', function(personas) {
+   
+    buidlUserList({data : personas});
+});
 
-//Mensajes privados
+// Mensajes privados
 socket.on('mensajePrivado', function(mensaje) {
-    console.log('Mensaje privado', mensaje)
-})
+
+    console.log('Mensaje Privado:', mensaje);
+
+});
